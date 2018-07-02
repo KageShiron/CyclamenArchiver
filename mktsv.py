@@ -1,13 +1,24 @@
 import glob
 import os
 import re
+import sys
+
+
+def usage():
+    print("Usage: python3 mktsv.py /path/to/cyclamendir /path/to/output")
+    exit()
 
 
 if __name__ == '__main__':
-    # output file
-    f = open("data.tsv", "w", encoding="utf-8")
 
-    list = glob.glob('**/*.log', recursive=True)
+    if len(sys.argv) < 3:
+        usage()
+    target = sys.argv[1]
+
+    # output file
+    f = open(sys.argv[2], "w", encoding="utf-8")
+
+    list = glob.glob(sys.argv[1] + '/**/*.log', recursive=True)
     # sort key == filename == message id
     list.sort(key=lambda x: int(os.path.splitext(os.path.basename(x))[0]))
 
