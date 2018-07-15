@@ -2,25 +2,27 @@ import csv
 import locale
 import sys
 import os
+import glob
+import subprocess
 from datetime import datetime as dt
 locale.setlocale(locale.LC_ALL, '')
 
 
 def usage():
-    print("Usage: python3 mktree.py /path/to/tsvfile.tsv /path/to/resultdir/")
+    print("Usage: python3 mktree.py /path/to/tsvfile.tsv /path/to/resultdir/ bbsname")
     exit()
 
 
-def makeSide(x):
+def makeSide(html, x):
     t = dt.strptime(x["time"], "%Y%m%d%w%H%M%S")
     s = f"""<li><div class="list-title">
     <span class="no">{x['id']}</span>
-    <a class="title" href="#{x['id']}">{x['title']}</a></div>
+    <a class="title" href="{html}#{x['id']}">{x['title']}</a></div>
     """
     if "children" in x:
         s += "<ul>"
         for c in x["children"]:
-            s += makeSide(c)
+            s += makeSide(html, c)
         s += "</ul>"
     s += "</li>"
     return s
@@ -28,7 +30,7 @@ def makeSide(x):
 
 def makeBody(x):
     t = dt.strptime(x["time"], "%Y%m%d%w%H%M%S")
-    s = f"""<li id={x['id']}><section><h1>
+    s = f"""<li><section><h1 id={x['id']}>
     <span class="no">[{x['id']}]</span>
     <a class="title" href="#{x['id']}">{x['title']}</a>
     <span class="author">{x['name']}</span>
@@ -44,18 +46,17 @@ def makeBody(x):
     return s
 
 
-def writeheader(f, x):
-    f.write("<!DOCTYPE html><html><head><meta charset='utf-8'><title>" +
-            x['title']+"</title><link rel='stylesheet' href='bbs.css' /><body>")
+def writeheader(x):
+    return "<!DOCTYPE html><html><head><meta charset='utf-8'><title>" + x['title']+"</title><link rel='stylesheet' href='bbs.css' /><script src='bbs.js'></script><body>"
 
 
-def writefooter(f,):
-    f.write('</body></html>')
+def writefooter():
+    return '</body></html>'
 
 
 if __name__ == '__main__':
 
-    if len(sys.argv) < 3:
+    if len(sys.argv) < 4:
         usage()
     result = sys.argv[2]
 
@@ -77,12 +78,21 @@ if __name__ == '__main__':
                         x["children"] = [y]  # new list
                     y["noroot"] = True
 
-        # write html
-        for x in ls:
-            if "noroot" not in x:   # only root node
-                print(x['id'])
-                with open(result + "/" + x['id'] + '.html', "w", encoding="utf-8") as f:
-                    writeheader(f, x)
-                    f.write(f'<ul class="side">{makeSide(x)}</ul>')
-                    f.write(f'<ul class="main">{makeBody(x)}</ul>')
-                    writefooter(f)
+        with open(result + "/index.html", "w", encoding="utf-8") as index:
+            # write html
+            for x in ls:
+                if "noroot" not in x:   # only root node
+                    print(x['id'])
+                    with open(result + "/" + x['id'] + '.html', "w", encoding="utf-8") as f:
+                        text = ""
+                        text += writeheader(x)
+                        side = makeSide(x["id"] + ".html", x)
+                        text += f'<ul class="side"><a href="./" class="toindex">←{sys.argv[3]}トップへ</a>{side}</ul>'
+                        index.write(f'<ul>{side}</ul>')
+                        text += f'<ul class="main">{makeBody(x)}</ul>'
+                        text += writefooter()
+
+                        # p = subprocess.Popen(
+                        #    ["prettier", "--parser=parse5"], stdin = subprocess.PIPE, stdout = f, shell = True)
+                        # p.communicate(text.encode())
+                        f.write(text)

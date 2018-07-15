@@ -4,6 +4,7 @@ li {
 
 section {
     border: 1px solid #CCC;
+    margin-bottom: .5em;
 }
 
 h1 {
@@ -36,23 +37,41 @@ h1 .author {
     font-size: 0.8em;
 }
 
-body {
-    display: grid;
+ul {
     margin: 0;
-    grid-template-rows: 1fr 1fr;
-    grid-template-columns: 20em 1fr;
 }
 
 .side {
     padding: 0;
-    grid-row: 1;
-    grid-column: 1;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    width: 300px;
+    border-right: 1px solid #CCC;
+}
+
+.actived {
+    background: #FFEEEE;
+    font-weight: bold;
 }
 
 .main {
     padding: 0;
-    grid-row: 1;
-    grid-column: 2;
+    margin-left: 300px;
+}
+
+.side .toindex {
+    display: block;
+    background: #FEE;
+    text-decoration: none;
+}
+
+.side li a {
+    text-decoration: none;
+}
+
+.side li a:hover {
+    text-decoration: underline;
 }
 
 .side li {
