@@ -3,7 +3,9 @@ import locale
 import sys
 import os
 import glob
+import re
 import subprocess
+import shutil
 from datetime import datetime as dt
 locale.setlocale(locale.LC_ALL, '')
 
@@ -30,12 +32,17 @@ def makeSide(html, x):
 
 def makeBody(x):
     t = dt.strptime(x["time"], "%Y%m%d%w%H%M%S")
+    body = re.sub("<!--.*?-->", "", x['body'])
+    body = re.sub(
+        "http://sakura-editor.sourceforge.net/cgi-bin/cyclamen/cyclamen.cgi\?log=(.*?)&tree=(?:r|c)(\d*?)", "../\\1/#\\2", body)
+    body = re.sub(
+        "http://sakura-editor.sourceforge.net/cgi-bin/cyclamen/cyclamen.cgi\?log=(.*?)&amp;tree=(?:r|c)(\d*?)", "\\1/#\\2", body)
     s = f"""<li><section><h1 id={x['id']}>
     <span class="no">[{x['id']}]</span>
     <a class="title" href="#{x['id']}">{x['title']}</a>
     <span class="author">{x['name']}</span>
     <time datetime="{t.isoformat()}">{t.strftime("%Y年%m月%d日 %H:%M")}</time></h1>
-    <div class="body">{x['body']}</div></section>
+    <div class="body">{body}</div></section>
     """
     if "children" in x:
         s += "<ul>"
@@ -77,7 +84,8 @@ if __name__ == '__main__':
                     else:
                         x["children"] = [y]  # new list
                     y["noroot"] = True
-
+        shutil.copy(os.path.dirname(__file__) + "/bbs.css", result)
+        shutil.copy(os.path.dirname(__file__) + "/bbs.js", result)
         with open(result + "/index.html", "w", encoding="utf-8") as index:
             # write html
             for x in ls:
