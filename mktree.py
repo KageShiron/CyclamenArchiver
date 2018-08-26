@@ -60,6 +60,21 @@ def writeheader(x):
 def writefooter():
     return '</body></html>'
 
+# for index.html
+def makeIndex(html, x):
+    t = dt.strptime(x["time"], "%Y%m%d%w%H%M%S")
+    s = f"""<li><div class="list-title">
+    <span class="no">{x['id']}</span>
+    <a class="title" id="{x['id']}" href="{html}#{x['id']}">{x['title']}</a></div>
+    """
+    if "children" in x:
+        s += "<ul>"
+        for c in x["children"]:
+            s += makeSide(html, c)
+        s += "</ul>"
+    s += "</li>"
+    return s
+
 
 if __name__ == '__main__':
 
@@ -86,7 +101,9 @@ if __name__ == '__main__':
                     y["noroot"] = True
         shutil.copy(os.path.dirname(__file__) + "/bbs.css", result)
         shutil.copy(os.path.dirname(__file__) + "/bbs.js", result)
+        shutil.copy(os.path.dirname(__file__) + "/index.css", result)
         with open(result + "/index.html", "w", encoding="utf-8") as index:
+            index.write(f"<!DOCTYPE html><html><head><meta charset='utf-8'><title>サクラエディタ 旧" + sys.argv[3]+"掲示板</title><link rel='stylesheet' href='index.css' /><body><h1>サクラエディタ 旧" + sys.argv[3]+"掲示板過去ログ</h1>")
             # write html
             for x in ls:
                 if "noroot" not in x:   # only root node
@@ -96,7 +113,7 @@ if __name__ == '__main__':
                         text += writeheader(x)
                         side = makeSide(x["id"] + ".html", x)
                         text += f'<ul class="side"><a href="./" class="toindex">←{sys.argv[3]}トップへ</a>{side}</ul>'
-                        index.write(f'<ul>{side}</ul>')
+                        index.write(f'<ul>{makeIndex(x["id"] + ".html", x)}</ul>')
                         text += f'<ul class="main">{makeBody(x)}</ul>'
                         text += writefooter()
 

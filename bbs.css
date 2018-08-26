@@ -60,6 +60,10 @@ ul {
     margin-left: 300px;
 }
 
+.main ul {
+    padding-left: 1em;
+}
+
 .side .toindex {
     display: block;
     background: #FEE;
