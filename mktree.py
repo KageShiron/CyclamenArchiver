@@ -27,21 +27,17 @@ def makeThreadHeader(x):
 
   <!-- Global site tag (gtag.js) - Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=UA-120820034-1"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() {{ dataLayer.push(arguments); }}
-    gtag('js', new Date());
-    gtag('config', 'UA-120820034-1');
-  </script>
 
   <link href="../bbs.css" type="text/css" rel="stylesheet">
-  <link rel="shortcut icon" href="favicon.ico">
+  <link rel="shortcut icon" href="/favicon.ico">
   <title>{ x['title'] } | サクラエディタ過去ログ</title>
 </head>
 <body>
 """
 
 def makeThreadSide(html, x):
+    if x['title'] is None:
+        return ""
     t = dt.strptime(x["time"], "%Y%m%d%w%H%M%S")
     s = f"""<li><div class="list-title">
     <span class="no">{x['id']}</span>
@@ -57,6 +53,8 @@ def makeThreadSide(html, x):
 
 
 def makeThreadBody(x):
+    if x['title'] is None:
+        return ""
     t = dt.strptime(x["time"], "%Y%m%d%w%H%M%S")
     body = re.sub("<!--.*?-->", "", x['body'])
     body = re.sub(
@@ -88,6 +86,8 @@ def makeFooter():
 
 # for index.html
 def makeIndexHtmlTree(html, x):
+    if x['title'] is None:
+        return ""
     t = dt.strptime(x["time"], "%Y%m%d%w%H%M%S")
     s = f"""<li><div class="list-title">
     <span class="no">{x['id']}</span>
@@ -115,16 +115,10 @@ def makeIndexHtmlHeader(title):
 
   <!-- Global site tag (gtag.js) - Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=UA-120820034-1"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() {{ dataLayer.push(arguments); }}
-    gtag('js', new Date());
-    gtag('config', 'UA-120820034-1');
-  </script>
 
   <link href="../../../dsk_sakura.css" type="text/css" rel="stylesheet">
   <link href="../index.css" type="text/css" rel="stylesheet">
-  <link rel="shortcut icon" href="favicon.ico">
+  <link rel="shortcut icon" href="/favicon.ico">
   <title>旧{ title }掲示板 過去ログ | サクラエディタ</title>
 </head>
 <body>
@@ -168,6 +162,7 @@ if __name__ == '__main__':
                     y["noroot"] = True
 
         with open(result + "/index.html", "w", encoding="utf-8") as index:
+            indexText = ""
             index.write(makeIndexHtmlHeader(sys.argv[3]))
             # write html
             for x in ls:
@@ -181,7 +176,7 @@ if __name__ == '__main__':
         <a href="./" class="toindex">◀{sys.argv[3]}トップへ</a>
         { makeThreadSide(x["id"] + ".html", x) }
     </ul>'''
-                    index.write(f'<ul>{makeIndexHtmlTree(x["id"] + ".html", x)}</ul>')
+                    indexText = f'<ul>{makeIndexHtmlTree(x["id"] + ".html", x)}</ul>' + indexText
                     text += f'<ul class="main">{makeThreadBody(x)}</ul>'
                     text += makeFooter()
 
@@ -189,3 +184,5 @@ if __name__ == '__main__':
                     #    ["prettier", "--parser=parse5"], stdin = subprocess.PIPE, stdout = f, shell = True)
                     # p.communicate(text.encode())
                     f.write(text)
+            index.write(indexText)
+            index.write("</body></html>")

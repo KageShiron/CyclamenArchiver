@@ -26,7 +26,7 @@ if __name__ == '__main__':
     print(me)
     print(list)
     for d in list:
-        subprocess.run(["python3", me + "/mktsv.py", d,
-                        f"{d}/../../results/{name[os.path.basename(d)]}.tsv"])
+        # subprocess.run(["python3", me + "/mktsv.py", d,
+        #                 f"{d}/../../results/{name[os.path.basename(d)]}.tsv"])
         subprocess.run(["python3", me + "/mktree.py", f"{d}/../../results/{name[os.path.basename(d)]}.tsv",
                         f"{d}/../../results/{name[os.path.basename(d)]}/", title[os.path.basename(d)]])
